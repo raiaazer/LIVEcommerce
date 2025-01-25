@@ -236,20 +236,20 @@
 
                         <ul class="pagination toolbox-item">
                             <li class="page-item" :class="{ disabled: !products.prev_page_url }">
-                                <a class="page-link page-link-btn" href="#" @click.prevent="fetchProducts(products.prev_page_url)">
+                                <Link class="page-link page-link-btn" :href="products.prev_page_url">
                                     <i class="icon-angle-left"></i>
-                                </a>
+                                </Link>
                             </li>
                             <li v-for="page in paginationLinks" :key="page.label" class="page-item" :class="{ active: page.active }">
-                                <a class="page-link" href="#" @click.prevent="fetchProducts(page.url)" v-if="page.url">
+                                <Link class="page-link" :href="page.url" v-if="page.url">
                                     {{ page.label }}
-                                </a>
+                                </Link>
                                 <span v-else class="page-link">{{ page.label }}</span>
                             </li>
                             <li class="page-item" :class="{ disabled: !products.next_page_url }">
-                                <a class="page-link page-link-btn" href="#" @click.prevent="fetchProducts(products.next_page_url)">
+                                <Link class="page-link page-link-btn" :href="products.next_page_url">
                                     <i class="icon-angle-right"></i>
-                                </a>
+                                </Link>
                             </li>
                         </ul>
                     </nav>
@@ -603,15 +603,15 @@
 <script setup>
 import Main from "../Layouts/Main.vue";
 import {baseURL} from "../Helpers/Path.js";
-import { useForm } from '@inertiajs/vue3';
+import {router, useForm} from '@inertiajs/vue3';
 import { usePage } from "@inertiajs/vue3";
 import { Inertia } from "@inertiajs/inertia";
-import { ref, computed, reactive } from "vue";
+import { ref, computed } from "vue";
+import { Link } from '@inertiajs/vue3';
 
 // const { products } = usePage().props;
+const products = computed(()=> usePage().props.products);
 
-const { products: initialProducts } = usePage().props;
-const products = reactive({ ...initialProducts });
 
 // const products = ref(usePage().props.products);
 const perPage = ref(12);
@@ -657,22 +657,6 @@ const addToCart = () => {
         },
     });
 };
-
-// const fetchProducts = (url) => {
-//     // Navigate to the new page URL using Inertia
-//     Inertia.visit(url);
-// };
-
-const fetchProducts = (url) => {
-    Inertia.get(url, {
-        only: ["products"],
-        onSuccess: (props) => {
-            products.value = props.products;
-            // Object.assign(products, props.products.data);
-        },
-    });
-};
-
 
 const changePerPage = (event) => {
     const newPerPage = parseInt(event.target.value, 10);
