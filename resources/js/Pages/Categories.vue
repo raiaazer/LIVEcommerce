@@ -621,6 +621,8 @@ const form = useForm({
     name: "",
     price: 0,
     quantity: 1, // Default quantity
+    image1: "",
+    image2: "",
 });
 
 const paginationLinks = computed(() => {
@@ -635,6 +637,9 @@ const addToCart = (product) => {
     form.product_id = product.id;
     form.name = product.name;
     form.price = product.price;
+    form.image1 = product.image1;
+    form.image2 = product.image2;
+    console.log(product);
 
     // Submit the form to add the product to the cart
     form.post("/cart/add", {
@@ -653,6 +658,8 @@ const addToCart = (product) => {
                     id: product.id,
                     name: product.name,
                     price: product.price,
+                    image1: product.image1,
+                    image2: product.image2,
                     quantity: 1,
                 });
             }

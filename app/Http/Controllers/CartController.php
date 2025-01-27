@@ -30,12 +30,16 @@ class CartController extends Controller
             'name' => ['bail', 'required'],
             'price' => ['bail', 'required'],
             'quantity' => ['bail', 'required'],
+            'image1' => ['bail', 'required'],
+            'image2' => ['bail', 'required'],
         ],
             [
                 'product_id.required' => 'product_id is required or incorrect',
                 'name.required' => 'name is required or incorrect',
                 'price.required' => 'price is required or incorrect',
                 'quantity.required' => 'quantity is required or incorrect',
+                'image1.required' => 'image1 is required or incorrect',
+                'image2.required' => 'image2 is required or incorrect',
             ]
         );
 
@@ -57,6 +61,8 @@ class CartController extends Controller
                 if ($item['product_id'] == $req['product_id']) {
                     $item['quantity'] += $req['quantity']; // Increment quantity
                     $item['subtotal'] = $item['quantity'] * $item['price']; // Update subtotal
+                    $item['image1'] = $req['image1'];
+                    $item['image2'] = $req['image2'];
                     $productFound = true;
                     break;
                 }
@@ -70,6 +76,8 @@ class CartController extends Controller
                     'price' => $req['price'],
                     'quantity' => $req['quantity'],
                     'subtotal' => $req['price'] * $req['quantity'],
+                    'image1' => $req['image1'],
+                    'image2' => $req['image2'],
                 ];
             }
 
@@ -93,6 +101,8 @@ class CartController extends Controller
                     'price' => $req['price'],
                     'quantity' => $req['quantity'],
                     'subtotal' => $req['price'] * $req['quantity'],
+                    'image1' => $req['image1'],
+                    'image2' => $req['image2'],
                 ],
             ]),
         ]);

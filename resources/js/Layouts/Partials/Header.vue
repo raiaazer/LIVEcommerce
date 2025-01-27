@@ -1,3 +1,19 @@
+<script setup>
+import {baseURL} from "@/Helpers/Path.js";
+import { Link } from '@inertiajs/vue3';
+import { usePage } from '@inertiajs/vue3';
+
+const categoriesRoute = '/Categories';
+const homeRoute = '/';
+const productsRoute = '/Products';
+
+const props = usePage().props;
+
+const cartCount = props.cartData.cartCount || 0;
+const cartItems = props.cartData.cartItems || [];
+const cartDetail = props.cartData.cartDetail || 0;
+
+</script>
 <template>
     <div class="top-notice p-0">
         <div class="owl-carousel info-boxes-slider" data-owl-options="{
@@ -104,7 +120,7 @@
                         <a href="#" title="Cart" class="dropdown-toggle cart-toggle" role="button"
                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-display="static">
                             <i class="minicart-icon"></i>
-                            <span class="cart-count badge-circle">3</span>
+                            <span class="cart-count badge-circle">{{ cartCount }}</span>
                         </a>
 
                         <div class="cart-overlay"></div>
@@ -116,78 +132,70 @@
                                 <div class="dropdown-cart-header">Shopping Cart</div>
                                 <!-- End .dropdown-cart-header -->
 
-                                <div class="dropdown-cart-products">
-                                    <div class="product">
-                                        <div class="product-details">
-                                            <h4 class="product-title">
-                                                <a href="demo20-product.html">Ultimate 3D Bluetooth Speaker</a>
-                                            </h4>
+                                <div v-if="cartItems.length > 0" class="dropdown-cart-products">
+<!--                                    <div v-if="cartItems.length > 0" class="cart-products">-->
+<!--                                        <h3>Your Cart</h3>-->
+<!--                                        <ul>-->
+<!--                                            <li v-for="item in cartItems" :key="item.product_id">-->
+<!--                                                <div>-->
+<!--                                                    <img :src="baseURL(item.image)" width="50" height="50" alt="product" />-->
+<!--                                                    <span>{{ item.name }}</span>-->
+<!--                                                    <span>{{ item.quantity }} x ${{ item.price }}</span>-->
+<!--                                                </div>-->
+<!--                                            </li>-->
+<!--                                        </ul>-->
+<!--                                    </div>-->
+<!--                                    <div v-else>-->
+<!--                                        <p>Your cart is empty.</p>-->
+<!--                                    </div>-->
 
-                                            <span class="cart-product-info">
-                                                    <span class="cart-product-qty">1</span>
-                                                    × $99.00
-                                                </span>
-                                        </div><!-- End .product-details -->
+                                    <div class="cart-products">
+                                        <h3>Your Cart</h3>
+                                        <ul>
+                                            <li v-for="item in cartItems" :key="item.product_id">
+                                                <div>
+                                                    <img :src="baseURL(item.image1)" width="50" height="50" alt="product" />
+                                                    <br>
+                                                    <span>Product Name: {{ item.name }}</span>
+                                                    <br>
+                                                    <span>Product Price: {{ item.quantity }} x ${{ item.price }}</span>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </div>
 
-                                        <figure class="product-image-container">
-                                            <a href="demo20-product.html" class="product-image">
-                                                <img :src="baseURL(`frontend/assets/images/products/product-1.jpg`)" alt="product"
-                                                     width="80" height="80">
-                                            </a>
 
-                                            <a href="#" class="btn-remove" title="Remove Product"><span>×</span></a>
-                                        </figure>
-                                    </div><!-- End .product -->
+<!--                                    <div class="product">-->
+<!--                                        <div class="product-details">-->
+<!--                                            <h4 class="product-title">-->
+<!--                                                <a href="demo20-product.html">Ultimate 3D Bluetooth Speaker</a>-->
+<!--                                            </h4>-->
 
-                                    <div class="product">
-                                        <div class="product-details">
-                                            <h4 class="product-title">
-                                                <a href="demo20-product.html">Brown Women Casual HandBag</a>
-                                            </h4>
+<!--                                            <span class="cart-product-info">-->
+<!--                                                    <span class="cart-product-qty">1</span>-->
+<!--                                                    × $99.00-->
+<!--                                                </span>-->
+<!--                                        </div>&lt;!&ndash; End .product-details &ndash;&gt;-->
 
-                                            <span class="cart-product-info">
-                                                    <span class="cart-product-qty">1</span>
-                                                    × $35.00
-                                                </span>
-                                        </div><!-- End .product-details -->
+<!--                                        <figure class="product-image-container">-->
+<!--                                            <a href="demo20-product.html" class="product-image">-->
+<!--                                                <img :src="baseURL(`frontend/assets/images/products/product-1.jpg`)" alt="product"-->
+<!--                                                     width="80" height="80">-->
+<!--                                            </a>-->
 
-                                        <figure class="product-image-container">
-                                            <a href="demo20-product.html" class="product-image">
-                                                <img :src="baseURL(`frontend/assets/images/products/product-2.jpg`)" alt="product"
-                                                     width="80" height="80">
-                                            </a>
+<!--                                            <a href="#" class="btn-remove" title="Remove Product"><span>×</span></a>-->
+<!--                                        </figure>-->
+<!--                                    </div>&lt;!&ndash; End .product &ndash;&gt;-->
+                                    <div class="dropdown-cart-total">
+                                        <span>SUBTOTAL:</span>
 
-                                            <a href="#" class="btn-remove" title="Remove Product"><span>×</span></a>
-                                        </figure>
-                                    </div><!-- End .product -->
-
-                                    <div class="product">
-                                        <div class="product-details">
-                                            <h4 class="product-title">
-                                                <a href="demo20-product.html">Circled Ultimate 3D Speaker</a>
-                                            </h4>
-
-                                            <span class="cart-product-info">
-                                                    <span class="cart-product-qty">1</span>
-                                                    × $35.00
-                                                </span>
-                                        </div><!-- End .product-details -->
-
-                                        <figure class="product-image-container">
-                                            <a href="demo20-product.html" class="product-image">
-                                                <img :src="baseURL(`frontend/assets/images/products/product-3.jpg`)" alt="product"
-                                                     width="80" height="80">
-                                            </a>
-                                            <a href="#" class="btn-remove" title="Remove Product"><span>×</span></a>
-                                        </figure>
-                                    </div><!-- End .product -->
+                                        <span class="cart-total-price float-right">{{ cartDetail.totalPrice }}</span>
+                                    </div>
                                 </div><!-- End .cart-product -->
-
-                                <div class="dropdown-cart-total">
-                                    <span>SUBTOTAL:</span>
-
-                                    <span class="cart-total-price float-right">$134.00</span>
-                                </div><!-- End .dropdown-cart-total -->
+                                <div v-else>
+                                    <p>Your cart is empty.</p>
+                                </div>
+                                <!-- End .dropdown-cart-total -->
 
                                 <div class="dropdown-cart-action">
                                     <a href="cart.html" class="btn btn-gray btn-block view-cart">View
@@ -283,7 +291,7 @@
                         <a href="#" title="Cart" class="dropdown-toggle cart-toggle" role="button"
                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-display="static">
                             <i class="minicart-icon"></i>
-                            <span class="cart-count badge-circle">3</span>
+                            <span class="cart-count badge-circle">{{ cartCount }}</span>
                         </a>
 
                         <div class="cart-overlay"></div>
@@ -380,19 +388,4 @@
         </div>
     </header><!-- End .header -->
 </template>
-<script setup>
-import {baseURL} from "@/Helpers/Path.js";
-import { Link } from '@inertiajs/vue3';
 
-
-const categoriesRoute = '/Categories';
-const homeRoute = '/';
-const productsRoute = '/Products';
-
-// defineExpose({
-//     categoriesRoute,
-// });
-// defineExpose({
-//     homeRoute,
-// });
-</script>
