@@ -242,7 +242,7 @@
                         <i class="fas fa-bars"></i>
                     </button>
                         <Link :href="homeRoute" class="logo">
-                            <img :src="baseURL(`assets/images/logo-black.png`)" alt="Porto Logo" width="101" height="40">
+                            <img :src="baseURL(`frontend/assets/images/logo-black.png`)" alt="Porto Logo" width="101" height="40">
                         </Link>
                 </div>
 

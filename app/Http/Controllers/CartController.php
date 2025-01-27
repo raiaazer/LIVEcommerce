@@ -44,38 +44,61 @@ class CartController extends Controller
             $flattened = Arr::flatten($validator->getMessageBag()->getMessages());
             return response()->json(['message' => 'Validation Error.',array_shift($flattened), 'code' => 404]);
         }
+
         $sessionId = $request->session()->getId();
-        $cart = Cart::updateOrCreate(['sessionId' => $sessionId],[
-            'userId' => 0,
+        $cartDetails = Cart::where('sessionId', $sessionId)->first();
+
+        if ($cartDetails) {
+            $productDetails = json_decode($cartDetails->cart_items, true) ?? [];
+            $productFound = false;
+
+            // Check if the product already exists in the cart
+            foreach ($productDetails as &$item) {
+                if ($item['product_id'] == $req['product_id']) {
+                    $item['quantity'] += $req['quantity']; // Increment quantity
+                    $item['subtotal'] = $item['quantity'] * $item['price']; // Update subtotal
+                    $productFound = true;
+                    break;
+                }
+            }
+
+            if (!$productFound) {
+                // Add the new product to the cart
+                $productDetails[] = [
+                    'product_id' => $req['product_id'],
+                    'name' => $req['name'],
+                    'price' => $req['price'],
+                    'quantity' => $req['quantity'],
+                    'subtotal' => $req['price'] * $req['quantity'],
+                ];
+            }
+
+            // Update cart items and total price
+            $cartDetails->cart_items = json_encode($productDetails);
+            $cartDetails->totalPrice = array_sum(array_column($productDetails, 'subtotal'));
+            $cartDetails->save();
+
+            return response()->json(['message' => 'Cart updated', 'cart' => $cartDetails]);
+        }
+
+// If no cart exists, create a new one
+        $cartDetails = Cart::create([
+            'userId' => 0, // Assuming guest user
             'sessionId' => $sessionId,
-            'totalPrice' => $req['price'] * $req['quantity'],
-            'cart_items' => json_encode($req),
+            'totalPrice' => $req['price'] * $req['quantity'], // Initial total price
+            'cart_items' => json_encode([
+                [
+                    'product_id' => $req['product_id'],
+                    'name' => $req['name'],
+                    'price' => $req['price'],
+                    'quantity' => $req['quantity'],
+                    'subtotal' => $req['price'] * $req['quantity'],
+                ],
+            ]),
         ]);
 
-//        dd($req, $sessionId);
-//
-//
-//        // Find or create a cart for this session
-//        $cart = Cart::firstOrCreate(
-//            ['sessionId' => $sessionId],
-//            ['totalPrice' => 0.00, 'cart_items' => []]
-//        );
-//
-//        // Get the cart items and append the new item
-//        $cartItems = $cart->cart_items ?? [];
-//        $cartItems[] = [
-//            'productId' => $validated['product_id'],
-//            'name' => $validated['name'],
-//            'price' => $validated['price'],
-//            'quantity' => $validated['quantity'],
-//        ];
-//
-//        // Update the cart with new items and calculate total price
-//        $cart->cart_items = $cartItems;
-//        $cart->totalPrice = collect($cartItems)->sum(fn($item) => $item['price'] * $item['quantity']);
-//        $cart->save();
+        return response()->json(['message' => 'New cart created and item added', 'cart' => $cartDetails]);
 
-        return response()->json(['message' => 'Item added to cart', 'cart' => $cart]);
     }
 
     /**

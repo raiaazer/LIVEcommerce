@@ -159,10 +159,10 @@
                         <div v-for="product in products.data" :key="product.id" class="col-6 col-sm-4">
                             <div class="product-default">
                                 <figure>
-                                    <a href="#">
+                                    <Link :href="productsRoute">
                                         <img :src="product.image1" width="280" height="280" alt="product" />
                                         <img :src="product.image2" width="280" height="280" alt="product" />
-                                    </a>
+                                    </Link>
                                     <div class="label-group">
                                         <div class="product-label label-hot">HOT</div>
                                         <div class="product-label label-sale">-20%</div>
@@ -179,7 +179,7 @@
                                         <span class="product-price">${{ product.price }}</span>
                                     </div>
                                     <div class="product-action">
-                                        <button class="btn btn-primary btn-add-cart" @click="addToCart(product.id)">
+                                        <button class="btn btn-primary btn-add-cart" @click="addToCart(product)">
                                             <i class="icon-shopping-cart"></i> ADD TO CART
                                         </button>
                                     </div>
@@ -608,39 +608,21 @@ import { usePage } from "@inertiajs/vue3";
 import { Inertia } from "@inertiajs/inertia";
 import { ref, computed } from "vue";
 import { Link } from '@inertiajs/vue3';
+import Products from "@/Pages/Products.vue";
 
 // const { products } = usePage().props;
 const products = computed(()=> usePage().props.products);
+const productsRoute = '/Products';
 
-
-// const products = ref(usePage().props.products);
 const perPage = ref(12);
 
-const product = {
-    id: 1, // Static product ID
-    name: 'Ultimate 3D Bluetooth Speaker',
-    price: 70.00,
-    oldPrice: 90.00,
-    image: 'frontend/assets/images/products/product-1.jpg',
-    category: 'Category', // Static Category
-};
-
-// Inertia form to handle AJAX post for adding to cart
 const form = useForm({
-    product_id: product.id,
-    name: product.name,
-    price: product.price,
-    quantity: 4,
+    product_id: null, // Dynamically populated
+    name: "",
+    price: 0,
+    quantity: 1, // Default quantity
 });
 
-// Computed property to get pagination links
-// const paginationLinks = computed(() => {
-//     return products.links.map((link) => ({
-//         label: link.label.replace('&laquo;', '«').replace('&raquo;', '»'),
-//         url: link.url,
-//         active: link.active,
-//     }));
-// });
 const paginationLinks = computed(() => {
     return products.value?.links?.map((link) => ({
         label: link.label.replace('&laquo;', '«').replace('&raquo;', '»'),
@@ -649,14 +631,47 @@ const paginationLinks = computed(() => {
     })) || [];
 });
 
+const addToCart = (product) => {
+    form.product_id = product.id;
+    form.name = product.name;
+    form.price = product.price;
 
-const addToCart = () => {
-    form.post('/cart/add', {
+    // Submit the form to add the product to the cart
+    form.post("/cart/add", {
+        // onSuccess: () => {
+        //     alert(`Product "${product.name}" added to cart!`);
+        // },
         onSuccess: () => {
-            alert('Product added to cart!');
-        },
+            // Update the cartProducts array after successfully adding the product
+            const existingProduct = cartProducts.value.find((p) => p.id === product.id);
+            if (existingProduct) {
+                // If the product is already in the cart, update the quantity
+                existingProduct.quantity += 1;
+            } else {
+                // If it's a new product, add it to the cart
+                cartProducts.value.push({
+                    id: product.id,
+                    name: product.name,
+                    price: product.price,
+                    quantity: 1,
+                });
+            }
+            alert(`Product "${product.name}" added to cart!`);
+        }
     });
 };
+
+// Function to update the cart products array
+// const updateCartProduct = (productId, newQuantity) => {
+//     const product = cartProducts.value.find((p) => p.id === productId);
+//     if (product) {
+//         product.quantity = newQuantity; // Update the quantity
+//         if (newQuantity === 0) {
+//             // Remove the product if quantity is 0
+//             cartProducts.value = cartProducts.value.filter((p) => p.id !== productId);
+//         }
+//     }
+// };
 
 const changePerPage = (event) => {
     const newPerPage = parseInt(event.target.value, 10);
