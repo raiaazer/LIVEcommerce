@@ -1,3 +1,138 @@
+<script setup>
+import Main from "../Layouts/Main.vue";
+import {baseURL} from "../Helpers/Path.js";
+import {router, useForm} from '@inertiajs/vue3';
+import { usePage } from "@inertiajs/vue3";
+import { Inertia } from "@inertiajs/inertia";
+import { ref, computed } from "vue";
+import { Link } from '@inertiajs/vue3';
+import Products from "@/Pages/Products.vue";
+
+// const { products } = usePage().props;
+const products = computed(()=> usePage().props.products);
+const productsRoute = '/Products';
+const perPage = ref(12);
+import { useToast } from "vue-toastification"; // For notifications
+import "vue-toastification/dist/index.css"; // Import toast styles
+const toast = useToast();
+
+const form = useForm({
+    product_id: null, // Dynamically populated
+    name: "",
+    price: 0,
+    quantity: 1, // Default quantity
+    image1: "",
+    image2: "",
+});
+
+const paginationLinks = computed(() => {
+    return products.value?.links?.map((link) => ({
+        label: link.label.replace('&laquo;', '«').replace('&raquo;', '»'),
+        url: link.url,
+        active: link.active,
+    })) || [];
+});
+
+const cartCount = ref(0);
+const cartItems = ref([]);
+const cartData = ref(null);
+const cartDetail = ref(null);
+
+const addToCart = (product) => {
+    form.product_id = product.id;
+    form.name = product.name;
+    form.price = product.price;
+    form.image1 = product.image1;
+    form.image2 = product.image2;
+    console.log(product);
+
+    // Submit the form to add the product to the cart
+    form.post("/cart/add", {
+        onSuccess: (response) => {
+            // Show success notification
+            toast.success(`Product "${product.name}" added to cart!`);
+            // Update cart count and items dynamically using the shared props
+
+            const { cartCount: newCartCount, cartItems: newCartItems, cartData: newCartData, cartDetail: newCartDetail } = response.props.cartData;
+
+            console.log(
+                newCartCount,
+                newCartItems,
+                newCartData,
+                newCartDetail
+            );
+
+            cartCount.value = newCartCount;
+            cartItems.value = newCartItems;
+            cartData.value = newCartData;
+            cartDetail.value = newCartDetail;
+
+            // const { cartCount } = response.props.cartData.cartCount;
+            // const { cartItems } = response.props.cartData.cartItems;
+            // const { cartData } = response.props.cartData;
+            // const { cartDetail } = response.props.cartData.cartDetail;
+            //
+            // console.log(response, cartCount, cartItems, cartData, cartDetail, response.props);
+            //
+            // // Update the UI with the latest cart data
+            // updateCartUI(cartCount, cartItems, cartData, cartDetail);
+        },
+        onError: () => {
+            // Show error notification
+            toast.error("Failed to add product to cart.");
+        },
+        // onSuccess: () => {
+        //     // Update the cartProducts array after successfully adding the product
+        //     const existingProduct = cartProducts.value.find((p) => p.id === product.id);
+        //     if (existingProduct) {
+        //         // If the product is already in the cart, update the quantity
+        //         existingProduct.quantity += 1;
+        //     } else {
+        //         // If it's a new product, add it to the cart
+        //         cartProducts.value.push({
+        //             id: product.id,
+        //             name: product.name,
+        //             price: product.price,
+        //             image1: product.image1,
+        //             image2: product.image2,
+        //             quantity: 1,
+        //         });
+        //     }
+        //     alert(`Product "${product.name}" added to cart!`);
+        // }
+    });
+};
+
+
+// const updateCartUI = (newCartCount, newCartItems, newCartData, newCartDetail) => {
+//     cartCount.value = newCartCount;
+//     cartItems.value = newCartItems;
+//     cartData.value = newCartData;
+//     cartDetail.value = newCartDetail;
+// };
+
+// Function to update the cart products array
+// const updateCartProduct = (productId, newQuantity) => {
+//     const product = cartProducts.value.find((p) => p.id === productId);
+//     if (product) {
+//         product.quantity = newQuantity; // Update the quantity
+//         if (newQuantity === 0) {
+//             // Remove the product if quantity is 0
+//             cartProducts.value = cartProducts.value.filter((p) => p.id !== productId);
+//         }
+//     }
+// };
+
+const changePerPage = (event) => {
+    const newPerPage = parseInt(event.target.value, 10);
+    Inertia.visit(window.location.href.split('?')[0], {
+        method: "get",
+        data: { per_page: newPerPage },
+    });
+};
+
+</script>
+
 <template>
     <main class="main">
         <div class="category-banner-container bg-gray">
@@ -66,18 +201,11 @@
                                         <option value="price-desc">Sort by price: high to low</option>
                                     </select>
                                 </div>
-                                <!-- End .select-custom -->
-
-
                             </div>
-                            <!-- End .toolbox-item -->
                         </div>
-                        <!-- End .toolbox-left -->
-
                         <div class="toolbox-right">
                             <div class="toolbox-item toolbox-show">
                                 <label>Show:</label>
-
                                 <div class="select-custom">
                                     <select name="count" class="form-control">
                                         <option value="12">12</option>
@@ -85,10 +213,7 @@
                                         <option value="36">36</option>
                                     </select>
                                 </div>
-                                <!-- End .select-custom -->
                             </div>
-                            <!-- End .toolbox-item -->
-
                             <div class="toolbox-item layout-modes">
                                 <a href="category.html" class="layout-btn btn-grid active" title="Grid">
                                     <i class="icon-mode-grid"></i>
@@ -97,63 +222,61 @@
                                     <i class="icon-mode-list"></i>
                                 </a>
                             </div>
-                            <!-- End .layout-modes -->
                         </div>
-                        <!-- End .toolbox-right -->
                     </nav>
 
                     <div class="row">
-<!--                            Vue.js Product-->
-<!--                        <div class="col-6 col-sm-4">-->
-<!--                            <div class="product-default">-->
-<!--                                <figure>-->
-<!--                                    <a href="product.html">-->
-<!--                                        <img :src="baseURL('frontend/assets/images/products/product-1.jpg')" width="280" height="280" alt="product" />-->
-<!--                                        <img :src="baseURL('frontend/assets/images/products/product-1-2.jpg')" width="280" height="280" alt="product" />-->
-<!--                                    </a>-->
+                        <!--                            Vue.js Product-->
+                        <!--                        <div class="col-6 col-sm-4">-->
+                        <!--                            <div class="product-default">-->
+                        <!--                                <figure>-->
+                        <!--                                    <a href="product.html">-->
+                        <!--                                        <img :src="baseURL('frontend/assets/images/products/product-1.jpg')" width="280" height="280" alt="product" />-->
+                        <!--                                        <img :src="baseURL('frontend/assets/images/products/product-1-2.jpg')" width="280" height="280" alt="product" />-->
+                        <!--                                    </a>-->
 
-<!--                                    <div class="label-group">-->
-<!--                                        <div class="product-label label-hot">HOT</div>-->
-<!--                                        <div class="product-label label-sale">-20%</div>-->
-<!--                                    </div>-->
-<!--                                </figure>-->
+                        <!--                                    <div class="label-group">-->
+                        <!--                                        <div class="product-label label-hot">HOT</div>-->
+                        <!--                                        <div class="product-label label-sale">-20%</div>-->
+                        <!--                                    </div>-->
+                        <!--                                </figure>-->
 
-<!--                                <div class="product-details">-->
-<!--                                    <div class="category-wrap">-->
-<!--                                        <div class="category-list">-->
-<!--                                            <a href="category.html" class="product-category">Category</a>-->
-<!--                                        </div>-->
-<!--                                    </div>-->
+                        <!--                                <div class="product-details">-->
+                        <!--                                    <div class="category-wrap">-->
+                        <!--                                        <div class="category-list">-->
+                        <!--                                            <a href="category.html" class="product-category">Category</a>-->
+                        <!--                                        </div>-->
+                        <!--                                    </div>-->
 
-<!--                                    <h3 class="product-title">-->
-<!--                                        <a href="product.html">Ultimate 3D Bluetooth Speaker</a>-->
-<!--                                    </h3>-->
+                        <!--                                    <h3 class="product-title">-->
+                        <!--                                        <a href="product.html">Ultimate 3D Bluetooth Speaker</a>-->
+                        <!--                                    </h3>-->
 
-<!--                                    <div class="ratings-container">-->
-<!--                                        <div class="product-ratings">-->
-<!--                                            <span class="ratings" style="width: 100%"></span>-->
-<!--                                            <span class="tooltiptext tooltip-top"></span>-->
-<!--                                        </div>-->
-<!--                                    </div>-->
+                        <!--                                    <div class="ratings-container">-->
+                        <!--                                        <div class="product-ratings">-->
+                        <!--                                            <span class="ratings" style="width: 100%"></span>-->
+                        <!--                                            <span class="tooltiptext tooltip-top"></span>-->
+                        <!--                                        </div>-->
+                        <!--                                    </div>-->
 
-<!--                                    <div class="price-box">-->
-<!--                                        <span class="old-price">$90.00</span>-->
-<!--                                        <span class="product-price">$70.00</span>-->
-<!--                                    </div>-->
+                        <!--                                    <div class="price-box">-->
+                        <!--                                        <span class="old-price">$90.00</span>-->
+                        <!--                                        <span class="product-price">$70.00</span>-->
+                        <!--                                    </div>-->
 
-<!--                                    <div class="product-action">-->
-<!--                                        <a href="wishlist.html" class="btn-icon-wish" title="wishlist"><i class="icon-heart"></i></a>-->
-<!--                                        <a href="javascript:void(0)" @click="addToCart" class="btn-icon btn-add-cart">-->
-<!--                                            <i class="fa fa-arrow-right"></i><span>SELECT OPTIONS</span>-->
-<!--                                        </a>-->
-<!--                                        <a href="ajax/product-quick-view.html" class="btn-quickview" title="Quick View">-->
-<!--                                            <i class="fas fa-external-link-alt"></i>-->
-<!--                                        </a>-->
-<!--                                    </div>-->
-<!--                                </div>-->
-<!--                            </div>-->
-<!--                        </div>-->
-<!--                            End Vue.js Product-->
+                        <!--                                    <div class="product-action">-->
+                        <!--                                        <a href="wishlist.html" class="btn-icon-wish" title="wishlist"><i class="icon-heart"></i></a>-->
+                        <!--                                        <a href="javascript:void(0)" @click="addToCart" class="btn-icon btn-add-cart">-->
+                        <!--                                            <i class="fa fa-arrow-right"></i><span>SELECT OPTIONS</span>-->
+                        <!--                                        </a>-->
+                        <!--                                        <a href="ajax/product-quick-view.html" class="btn-quickview" title="Quick View">-->
+                        <!--                                            <i class="fas fa-external-link-alt"></i>-->
+                        <!--                                        </a>-->
+                        <!--                                    </div>-->
+                        <!--                                </div>-->
+                        <!--                            </div>-->
+                        <!--                        </div>-->
+                        <!--                            End Vue.js Product-->
 
 
                         <div v-for="product in products.data" :key="product.id" class="col-6 col-sm-4">
@@ -171,7 +294,7 @@
                                 <div class="product-details">
                                     <div class="category-wrap">
                                         <div class="category-list">
-                                        <a href="#">{{ product.name }}</a>
+                                            <a href="#">{{ product.name }}</a>
                                         </div>
                                     </div>
                                     <div class="price-box">
@@ -186,42 +309,39 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- End .col-sm-4 -->
                     </div>
-                    <!-- End .row -->
 
-<!--                    <nav class="toolbox toolbox-pagination">-->
-<!--                        <div class="toolbox-item toolbox-show">-->
-<!--                            <label>Show:</label>-->
+                    <!--                    <nav class="toolbox toolbox-pagination">-->
+                    <!--                        <div class="toolbox-item toolbox-show">-->
+                    <!--                            <label>Show:</label>-->
 
-<!--                            <div class="select-custom">-->
-<!--                                <select name="count" class="form-control">-->
-<!--                                    <option value="12">12</option>-->
-<!--                                    <option value="24">24</option>-->
-<!--                                    <option value="36">36</option>-->
-<!--                                </select>-->
-<!--                            </div>-->
-<!--                            &lt;!&ndash; End .select-custom &ndash;&gt;-->
-<!--                        </div>-->
-<!--                        &lt;!&ndash; End .toolbox-item &ndash;&gt;-->
+                    <!--                            <div class="select-custom">-->
+                    <!--                                <select name="count" class="form-control">-->
+                    <!--                                    <option value="12">12</option>-->
+                    <!--                                    <option value="24">24</option>-->
+                    <!--                                    <option value="36">36</option>-->
+                    <!--                                </select>-->
+                    <!--                            </div>-->
+                    <!--                            &lt;!&ndash; End .select-custom &ndash;&gt;-->
+                    <!--                        </div>-->
+                    <!--                        &lt;!&ndash; End .toolbox-item &ndash;&gt;-->
 
-<!--                        <ul class="pagination toolbox-item">-->
-<!--                            <li class="page-item disabled">-->
-<!--                                <a class="page-link page-link-btn" href="#"><i class="icon-angle-left"></i></a>-->
-<!--                            </li>-->
-<!--                            <li class="page-item active">-->
-<!--                                <a class="page-link" href="#">1 <span class="sr-only">(current)</span></a>-->
-<!--                            </li>-->
-<!--                            <li class="page-item"><a class="page-link" href="#">2</a></li>-->
-<!--                            <li class="page-item"><a class="page-link" href="#">3</a></li>-->
-<!--                            <li class="page-item"><span class="page-link">...</span></li>-->
-<!--                            <li class="page-item">-->
-<!--                                <a class="page-link page-link-btn" href="#"><i class="icon-angle-right"></i></a>-->
-<!--                            </li>-->
-<!--                        </ul>-->
-<!--                    </nav>-->
-                    <!-- Pagination Controls -->
-                    <!-- Pagination -->
+                    <!--                        <ul class="pagination toolbox-item">-->
+                    <!--                            <li class="page-item disabled">-->
+                    <!--                                <a class="page-link page-link-btn" href="#"><i class="icon-angle-left"></i></a>-->
+                    <!--                            </li>-->
+                    <!--                            <li class="page-item active">-->
+                    <!--                                <a class="page-link" href="#">1 <span class="sr-only">(current)</span></a>-->
+                    <!--                            </li>-->
+                    <!--                            <li class="page-item"><a class="page-link" href="#">2</a></li>-->
+                    <!--                            <li class="page-item"><a class="page-link" href="#">3</a></li>-->
+                    <!--                            <li class="page-item"><span class="page-link">...</span></li>-->
+                    <!--                            <li class="page-item">-->
+                    <!--                                <a class="page-link page-link-btn" href="#"><i class="icon-angle-right"></i></a>-->
+                    <!--                            </li>-->
+                    <!--                        </ul>-->
+                    <!--                    </nav>-->
+                    =                    <!-- Pagination -->
                     <nav class="toolbox toolbox-pagination">
                         <div class="toolbox-item toolbox-show">
                             <label>Show:</label>
@@ -254,8 +374,7 @@
                         </ul>
                     </nav>
                 </div>
-                <!-- End .col-lg-9 -->
-
+                =
                 <div class="sidebar-overlay"></div>
                 <aside class="sidebar-shop col-lg-3 order-lg-first mobile-sidebar">
                     <div class="sidebar-wrapper">
@@ -317,49 +436,33 @@
                                         <li><a href="#">Music<span class="products-count">(2)</span></a></li>
                                     </ul>
                                 </div>
-                                <!-- End .widget-body -->
                             </div>
-                            <!-- End .collapse -->
                         </div>
-                        <!-- End .widget -->
-
                         <div class="widget">
                             <h3 class="widget-title">
                                 <a data-toggle="collapse" href="#widget-body-3" role="button" aria-expanded="true" aria-controls="widget-body-3">Price</a>
                             </h3>
-
                             <div class="collapse show" id="widget-body-3">
                                 <div class="widget-body pb-0">
                                     <form action="#">
                                         <div class="price-slider-wrapper">
                                             <div id="price-slider"></div>
-                                            <!-- End #price-slider -->
                                         </div>
-                                        <!-- End .price-slider-wrapper -->
-
                                         <div class="filter-price-action d-flex align-items-center justify-content-between flex-wrap">
                                             <div class="filter-price-text">
                                                 Price:
                                                 <span id="filter-price-range"></span>
                                             </div>
-                                            <!-- End .filter-price-text -->
-
                                             <button type="submit" class="btn btn-primary">Filter</button>
                                         </div>
-                                        <!-- End .filter-price-action -->
                                     </form>
                                 </div>
-                                <!-- End .widget-body -->
                             </div>
-                            <!-- End .collapse -->
                         </div>
-                        <!-- End .widget -->
-
                         <div class="widget widget-color">
                             <h3 class="widget-title">
                                 <a data-toggle="collapse" href="#widget-body-4" role="button" aria-expanded="true" aria-controls="widget-body-4">Color</a>
                             </h3>
-
                             <div class="collapse show" id="widget-body-4">
                                 <div class="widget-body pb-0">
                                     <ul class="config-swatch-list">
@@ -380,17 +483,12 @@
                                         </li>
                                     </ul>
                                 </div>
-                                <!-- End .widget-body -->
                             </div>
-                            <!-- End .collapse -->
                         </div>
-                        <!-- End .widget -->
-
                         <div class="widget widget-size">
                             <h3 class="widget-title">
                                 <a data-toggle="collapse" href="#widget-body-5" role="button" aria-expanded="true" aria-controls="widget-body-5">Sizes</a>
                             </h3>
-
                             <div class="collapse show" id="widget-body-5">
                                 <div class="widget-body pb-0">
                                     <ul class="config-size-list">
@@ -400,15 +498,10 @@
                                         <li><a href="#">S</a></li>
                                     </ul>
                                 </div>
-                                <!-- End .widget-body -->
                             </div>
-                            <!-- End .collapse -->
                         </div>
-                        <!-- End .widget -->
-
                         <div class="widget widget-featured">
                             <h3 class="widget-title">Featured</h3>
-
                             <div class="widget-body">
                                 <div class="owl-carousel widget-featured-products">
                                     <div class="featured-col">
@@ -425,18 +518,13 @@
                                                 <div class="ratings-container">
                                                     <div class="product-ratings">
                                                         <span class="ratings" style="width:100%"></span>
-                                                        <!-- End .ratings -->
                                                         <span class="tooltiptext tooltip-top"></span>
                                                     </div>
-                                                    <!-- End .product-ratings -->
                                                 </div>
-                                                <!-- End .product-container -->
                                                 <div class="price-box">
                                                     <span class="product-price">$49.00</span>
                                                 </div>
-                                                <!-- End .price-box -->
                                             </div>
-                                            <!-- End .product-details -->
                                         </div>
                                         <div class="product-default left-details product-widget">
                                             <figure>
@@ -451,18 +539,13 @@
                                                 <div class="ratings-container">
                                                     <div class="product-ratings">
                                                         <span class="ratings" style="width:100%"></span>
-                                                        <!-- End .ratings -->
                                                         <span class="tooltiptext tooltip-top"></span>
                                                     </div>
-                                                    <!-- End .product-ratings -->
                                                 </div>
-                                                <!-- End .product-container -->
                                                 <div class="price-box">
                                                     <span class="product-price">$49.00</span>
                                                 </div>
-                                                <!-- End .price-box -->
                                             </div>
-                                            <!-- End .product-details -->
                                         </div>
                                         <div class="product-default left-details product-widget">
                                             <figure>
@@ -477,22 +560,15 @@
                                                 <div class="ratings-container">
                                                     <div class="product-ratings">
                                                         <span class="ratings" style="width:100%"></span>
-                                                        <!-- End .ratings -->
                                                         <span class="tooltiptext tooltip-top"></span>
                                                     </div>
-                                                    <!-- End .product-ratings -->
                                                 </div>
-                                                <!-- End .product-container -->
                                                 <div class="price-box">
                                                     <span class="product-price">$49.00</span>
                                                 </div>
-                                                <!-- End .price-box -->
                                             </div>
-                                            <!-- End .product-details -->
                                         </div>
                                     </div>
-                                    <!-- End .featured-col -->
-
                                     <div class="featured-col">
                                         <div class="product-default left-details product-widget">
                                             <figure>
@@ -507,18 +583,13 @@
                                                 <div class="ratings-container">
                                                     <div class="product-ratings">
                                                         <span class="ratings" style="width:100%"></span>
-                                                        <!-- End .ratings -->
                                                         <span class="tooltiptext tooltip-top"></span>
                                                     </div>
-                                                    <!-- End .product-ratings -->
                                                 </div>
-                                                <!-- End .product-container -->
                                                 <div class="price-box">
                                                     <span class="product-price">$49.00</span>
                                                 </div>
-                                                <!-- End .price-box -->
                                             </div>
-                                            <!-- End .product-details -->
                                         </div>
                                         <div class="product-default left-details product-widget">
                                             <figure>
@@ -533,18 +604,13 @@
                                                 <div class="ratings-container">
                                                     <div class="product-ratings">
                                                         <span class="ratings" style="width:100%"></span>
-                                                        <!-- End .ratings -->
                                                         <span class="tooltiptext tooltip-top"></span>
                                                     </div>
-                                                    <!-- End .product-ratings -->
                                                 </div>
-                                                <!-- End .product-container -->
                                                 <div class="price-box">
                                                     <span class="product-price">$49.00</span>
                                                 </div>
-                                                <!-- End .price-box -->
                                             </div>
-                                            <!-- End .product-details -->
                                         </div>
                                         <div class="product-default left-details product-widget">
                                             <figure>
@@ -559,133 +625,28 @@
                                                 <div class="ratings-container">
                                                     <div class="product-ratings">
                                                         <span class="ratings" style="width:100%"></span>
-                                                        <!-- End .ratings -->
+
                                                         <span class="tooltiptext tooltip-top"></span>
                                                     </div>
-                                                    <!-- End .product-ratings -->
                                                 </div>
-                                                <!-- End .product-container -->
                                                 <div class="price-box">
                                                     <span class="product-price">$49.00</span>
                                                 </div>
-                                                <!-- End .price-box -->
                                             </div>
-                                            <!-- End .product-details -->
                                         </div>
                                     </div>
-                                    <!-- End .featured-col -->
                                 </div>
-                                <!-- End .widget-featured-slider -->
                             </div>
-                            <!-- End .widget-body -->
                         </div>
-                        <!-- End .widget -->
-
                         <div class="widget widget-block">
                             <h3 class="widget-title">Custom HTML Block</h3>
                             <h5>This is a custom sub-title.</h5>
                             <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras non placerat mi. Etiam non tellus </p>
                         </div>
-                        <!-- End .widget -->
                     </div>
-                    <!-- End .sidebar-wrapper -->
                 </aside>
-                <!-- End .col-lg-3 -->
             </div>
-            <!-- End .row -->
         </div>
-        <!-- End .container -->
-
         <div class="mb-4"></div>
-        <!-- margin -->
-    </main><!-- End .main -->
+    </main>
 </template>
-<script setup>
-import Main from "../Layouts/Main.vue";
-import {baseURL} from "../Helpers/Path.js";
-import {router, useForm} from '@inertiajs/vue3';
-import { usePage } from "@inertiajs/vue3";
-import { Inertia } from "@inertiajs/inertia";
-import { ref, computed } from "vue";
-import { Link } from '@inertiajs/vue3';
-import Products from "@/Pages/Products.vue";
-
-// const { products } = usePage().props;
-const products = computed(()=> usePage().props.products);
-const productsRoute = '/Products';
-
-const perPage = ref(12);
-
-const form = useForm({
-    product_id: null, // Dynamically populated
-    name: "",
-    price: 0,
-    quantity: 1, // Default quantity
-    image1: "",
-    image2: "",
-});
-
-const paginationLinks = computed(() => {
-    return products.value?.links?.map((link) => ({
-        label: link.label.replace('&laquo;', '«').replace('&raquo;', '»'),
-        url: link.url,
-        active: link.active,
-    })) || [];
-});
-
-const addToCart = (product) => {
-    form.product_id = product.id;
-    form.name = product.name;
-    form.price = product.price;
-    form.image1 = product.image1;
-    form.image2 = product.image2;
-    console.log(product);
-
-    // Submit the form to add the product to the cart
-    form.post("/cart/add", {
-        // onSuccess: () => {
-        //     alert(`Product "${product.name}" added to cart!`);
-        // },
-        onSuccess: () => {
-            // Update the cartProducts array after successfully adding the product
-            const existingProduct = cartProducts.value.find((p) => p.id === product.id);
-            if (existingProduct) {
-                // If the product is already in the cart, update the quantity
-                existingProduct.quantity += 1;
-            } else {
-                // If it's a new product, add it to the cart
-                cartProducts.value.push({
-                    id: product.id,
-                    name: product.name,
-                    price: product.price,
-                    image1: product.image1,
-                    image2: product.image2,
-                    quantity: 1,
-                });
-            }
-            alert(`Product "${product.name}" added to cart!`);
-        }
-    });
-};
-
-// Function to update the cart products array
-// const updateCartProduct = (productId, newQuantity) => {
-//     const product = cartProducts.value.find((p) => p.id === productId);
-//     if (product) {
-//         product.quantity = newQuantity; // Update the quantity
-//         if (newQuantity === 0) {
-//             // Remove the product if quantity is 0
-//             cartProducts.value = cartProducts.value.filter((p) => p.id !== productId);
-//         }
-//     }
-// };
-
-const changePerPage = (event) => {
-    const newPerPage = parseInt(event.target.value, 10);
-    Inertia.visit(window.location.href.split('?')[0], {
-        method: "get",
-        data: { per_page: newPerPage },
-    });
-};
-
-</script>

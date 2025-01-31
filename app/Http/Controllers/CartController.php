@@ -6,6 +6,7 @@ use App\Models\Cart;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
+use Inertia\Inertia;
 
 class CartController extends Controller
 {
@@ -86,7 +87,27 @@ class CartController extends Controller
             $cartDetails->totalPrice = array_sum(array_column($productDetails, 'subtotal'));
             $cartDetails->save();
 
-            return response()->json(['message' => 'Cart updated', 'cart' => $cartDetails]);
+            Inertia::share([
+                'cartData' => function () {
+                    $sessionId = session()->getId();
+                    $cartDetail = Cart::where('sessionId', $sessionId)->first();
+
+                    $cartCount = 0;
+                    $cartItems = [];
+
+                    if ($cartDetail) {
+                        $cartItems = json_decode($cartDetail->cart_items, true);
+                        $cartCount = count($cartItems);
+                    }
+
+                    return [
+                        'cartCount' => $cartCount,
+                        'cartItems' => $cartItems,
+                        'cartDetail'=>$cartDetail
+                    ];
+                },
+            ]);
+//            return response()->json(['message' => 'Cart updated', 'cart' => $cartDetails]);
         }
 
 // If no cart exists, create a new one
@@ -107,8 +128,26 @@ class CartController extends Controller
             ]),
         ]);
 
-        return response()->json(['message' => 'New cart created and item added', 'cart' => $cartDetails]);
+        $cartCount = 0;
+        $cartItems = [];
 
+        if ($cartDetails) {
+            $cartItems = json_decode($cartDetails->cart_items, true);
+            $cartCount = count($cartItems);
+        }
+
+//        return response()->json([
+//            'cartCount' => $cartCount,
+//            'cartItems' => $cartItems,
+//            'cartDetail' => $cartDetails,
+//            'message' => 'New cart created and item added'
+//        ]);
+        return inertia('Categories', [
+            'cartCount' => $cartCount,
+            'cartItems' => $cartItems,
+            'cartDetail' => $cartDetails,
+            'message' => 'New cart created and item added',
+        ]);
     }
 
     /**

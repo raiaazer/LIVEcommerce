@@ -34,25 +34,25 @@ const cartDetail = props.cartData.cartDetail || 0;
 
                 <div class="info-box-content">
                     <h4>Free Shipping on Orders Over $99</h4>
-                </div><!-- End .info-box-content -->
-            </div><!-- End .info-box -->
+                </div>
+            </div>
 
             <div class="info-box info-box-icon-left bg-dark">
                 <i class="icon-money"></i>
 
                 <div class="info-box-content">
                     <h4>Up to 40% OFF on Selected Items</h4>
-                </div><!-- End .info-box-content -->
-            </div><!-- End .info-box -->
+                </div>
+            </div>
 
             <div class="info-box info-box-icon-left">
                 <i class="icon-secure-payment"></i>
 
                 <div class="info-box-content">
                     <h4>100% Secure Payment</h4>
-                </div><!-- End .info-box-content -->
-            </div><!-- End .info-box -->
-        </div><!-- End .owl-carousel -->
+                </div>
+            </div>
+        </div>
     </div>
 
     <header class="header">
@@ -69,10 +69,10 @@ const cartDetail = props.cartData.cartDetail || 0;
                                 <input type="search" class="form-control" name="q" id="q" placeholder="Search..."
                                        required="">
                                 <button class="btn icon-magnifier p-0" type="submit"></button>
-                            </div><!-- End .header-search-wrapper -->
+                            </div>
                         </form>
                     </div>
-                </div><!-- End .header-dropdown -->
+                </div>
 
                 <div class="header-right ml-0 ml-lg-auto">
                     <div class="header-dropdowns">
@@ -84,7 +84,7 @@ const cartDetail = props.cartData.cartDetail || 0;
                                     <li><a href="#">USD</a></li>
                                 </ul>
                             </div>
-                        </div><!-- End .header-menu -->
+                        </div>
 
                         <div class="header-dropdown">
                             <a href="#"><i class="flag-us flag"></i>ENG</a>
@@ -94,8 +94,8 @@ const cartDetail = props.cartData.cartDetail || 0;
                                     </li>
                                     <li><a href="#"><i class="flag-fr flag mr-2"></i>FRA</a></li>
                                 </ul>
-                            </div><!-- End .header-menu -->
-                        </div><!-- End .header-dropdown -->
+                            </div>
+                        </div>
 
                         <div class="header-dropdown dropdown-expanded d-none d-lg-block">
                             <a href="#">Links</a>
@@ -130,7 +130,7 @@ const cartDetail = props.cartData.cartDetail || 0;
 
                             <div class="dropdownmenu-wrapper custom-scrollbar">
                                 <div class="dropdown-cart-header">Shopping Cart</div>
-                                <!-- End .dropdown-cart-header -->
+
 
                                 <div v-if="cartItems.length > 0" class="dropdown-cart-products">
 <!--                                    <div v-if="cartItems.length > 0" class="cart-products">-->
@@ -158,7 +158,11 @@ const cartDetail = props.cartData.cartDetail || 0;
                                                     <br>
                                                     <span>Product Name: {{ item.name }}</span>
                                                     <br>
-                                                    <span>Product Price: {{ item.quantity }} x ${{ item.price }}</span>
+                                                    <span>Quantity: {{ item.quantity }} </span>
+                                                    <br>
+                                                    <span>Product Price: ${{ item.price }} </span>
+                                                    <br>
+                                                    <span>Sub Total: ${{ item.subtotal }} </span>
                                                 </div>
                                             </li>
                                         </ul>
@@ -189,25 +193,25 @@ const cartDetail = props.cartData.cartDetail || 0;
                                     <div class="dropdown-cart-total">
                                         <span>SUBTOTAL:</span>
 
-                                        <span class="cart-total-price float-right">{{ cartDetail.totalPrice }}</span>
+                                        <span class="cart-total-price float-right"> ${{ cartDetail.totalPrice }}</span>
                                     </div>
-                                </div><!-- End .cart-product -->
+                                </div>
                                 <div v-else>
                                     <p>Your cart is empty.</p>
                                 </div>
-                                <!-- End .dropdown-cart-total -->
+
 
                                 <div class="dropdown-cart-action">
                                     <a href="cart.html" class="btn btn-gray btn-block view-cart">View
                                         Cart</a>
                                     <a href="checkout.html" class="btn btn-dark btn-block">Checkout</a>
-                                </div><!-- End .dropdown-cart-total -->
-                            </div><!-- End .dropdownmenu-wrapper -->
-                        </div><!-- End .dropdown-menu -->
-                    </div><!-- End .dropdown -->
-                </div><!-- End .header-right -->
-            </div><!-- End .container -->
-        </div><!-- End .header-top -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="header-middle sticky-header">
             <div class="container">
                 <div class="header-left d-none d-lg-flex justify-content-center">
@@ -335,7 +339,7 @@ const cartDetail = props.cartData.cartDetail || 0;
                                                     <span class="cart-product-qty">1</span>
                                                     × $35.00
                                                 </span>
-                                        </div><!-- End .product-details -->
+                                        </div>
 
                                         <figure class="product-image-container">
                                             <a href="demo20-product.html" class="product-image">
@@ -345,7 +349,7 @@ const cartDetail = props.cartData.cartDetail || 0;
 
                                             <a href="#" class="btn-remove" title="Remove Product"><span>×</span></a>
                                         </figure>
-                                    </div><!-- End .product -->
+                                    </div>
 
                                     <div class="product">
                                         <div class="product-details">
@@ -357,7 +361,7 @@ const cartDetail = props.cartData.cartDetail || 0;
                                                     <span class="cart-product-qty">1</span>
                                                     × $35.00
                                                 </span>
-                                        </div><!-- End .product-details -->
+                                        </div>
 
                                         <figure class="product-image-container">
                                             <a href="demo20-product.html" class="product-image">
@@ -366,26 +370,26 @@ const cartDetail = props.cartData.cartDetail || 0;
                                             </a>
                                             <a href="#" class="btn-remove" title="Remove Product"><span>×</span></a>
                                         </figure>
-                                    </div><!-- End .product -->
-                                </div><!-- End .cart-product -->
+                                    </div>
+                                </div>
 
                                 <div class="dropdown-cart-total">
                                     <span>SUBTOTAL:</span>
 
                                     <span class="cart-total-price float-right">$134.00</span>
-                                </div><!-- End .dropdown-cart-total -->
+                                </div>
 
                                 <div class="dropdown-cart-action">
                                     <a href="cart.html" class="btn btn-gray btn-block view-cart">View
                                         Cart</a>
                                     <a href="checkout.html" class="btn btn-dark btn-block">Checkout</a>
-                                </div><!-- End .dropdown-cart-total -->
-                            </div><!-- End .dropdownmenu-wrapper -->
-                        </div><!-- End .dropdown-menu -->
-                    </div><!-- End .dropdown -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </header><!-- End .header -->
+    </header>
 </template>
 
