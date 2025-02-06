@@ -90,20 +90,19 @@ class CartController extends Controller
             Inertia::share([
                 'cartData' => function () {
                     $sessionId = session()->getId();
-                    $cartDetail = Cart::where('sessionId', $sessionId)->first();
+                    $cartData = Cart::where('sessionId', $sessionId)->first();
 
                     $cartCount = 0;
                     $cartItems = [];
 
-                    if ($cartDetail) {
-                        $cartItems = json_decode($cartDetail->cart_items, true);
+                    if ($cartData) {
+                        $cartItems = json_decode($cartData->cart_items, true);
                         $cartCount = count($cartItems);
                     }
 
                     return [
-                        'cartCount' => $cartCount,
-                        'cartItems' => $cartItems,
-                        'cartDetail'=>$cartDetail
+                        'cartItems'=>$cartItems,
+                        'cartData'=>$cartData
                     ];
                 },
             ]);
@@ -111,7 +110,7 @@ class CartController extends Controller
         }
 
 // If no cart exists, create a new one
-        $cartDetails = Cart::create([
+        Cart::create([
             'userId' => 0, // Assuming guest user
             'sessionId' => $sessionId,
             'totalPrice' => $req['price'] * $req['quantity'], // Initial total price
@@ -128,11 +127,13 @@ class CartController extends Controller
             ]),
         ]);
 
+        $sessionId = session()->getId();
+        $cartData = Cart::where('sessionId', $sessionId)->first();
         $cartCount = 0;
         $cartItems = [];
 
-        if ($cartDetails) {
-            $cartItems = json_decode($cartDetails->cart_items, true);
+        if ($cartData) {
+            $cartItems = json_decode($cartData->cart_items, true);
             $cartCount = count($cartItems);
         }
 
@@ -145,7 +146,7 @@ class CartController extends Controller
         return inertia('Categories', [
             'cartCount' => $cartCount,
             'cartItems' => $cartItems,
-            'cartDetail' => $cartDetails,
+            'cartData' => $cartData,
             'message' => 'New cart created and item added',
         ]);
     }

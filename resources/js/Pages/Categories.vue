@@ -25,6 +25,7 @@ const form = useForm({
     image2: "",
 });
 
+const props = usePage().props;
 const paginationLinks = computed(() => {
     return products.value?.links?.map((link) => ({
         label: link.label.replace('&laquo;', '«').replace('&raquo;', '»'),
@@ -53,19 +54,14 @@ const addToCart = (product) => {
             toast.success(`Product "${product.name}" added to cart!`);
             // Update cart count and items dynamically using the shared props
 
-            const { cartCount: newCartCount, cartItems: newCartItems, cartData: newCartData, cartDetail: newCartDetail } = response.props.cartData;
+            const newcartCount = response.props.cartCount;
+            const newcartItems = response.props.cartItems;
+            const newcartData = response.props.cartData;
 
-            console.log(
-                newCartCount,
-                newCartItems,
-                newCartData,
-                newCartDetail
-            );
-
-            cartCount.value = newCartCount;
-            cartItems.value = newCartItems;
-            cartData.value = newCartData;
-            cartDetail.value = newCartDetail;
+            cartCount.value = newcartCount;
+            cartItems.value = newcartItems;
+            cartData.value = newcartData;
+            // cartDetail.value = newCartDetail;
 
             // const { cartCount } = response.props.cartData.cartCount;
             // const { cartItems } = response.props.cartData.cartItems;
